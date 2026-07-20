@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Real Estate Deal Analyzer — Heewon Kim</title>
+<link rel="stylesheet" href="css/style.css?v=4">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js" integrity="sha384-iU8HYtnGQ8Cy4zl7gbNMOhsDTTKX02BTXptVP/vqAWIaTfM7isw76iyZCsjL2eVi" crossorigin="anonymous"></script>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="portfolio-link" href="https://app.notion.com/p/39fc9e01eb308124b369df917f865fd0" target="_blank" rel="noopener">← Part of my Product Portfolio</a>
+    <h1>Real Estate Deal Analyzer</h1>
+    <p class="sub">Underwrite rental properties: cash flow, cap rate, cash-on-cash return, scenario stress-testing, and portfolio tracking.</p>
+    <p class="byline">Built by Heewon Kim — Senior Product Manager, personal project</p>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="calculator">Calculator</button>
+    <button class="tab-btn" data-tab="search">Property Search</button>
+    <button class="tab-btn" data-tab="portfolio">Portfolio</button>
+    <button class="tab-btn" data-tab="compare">Compare</button>
+  </nav>
+
+  <!-- ===================== CALCULATOR ===================== -->
+  <div id="tab-calculator" class="tab-panel active">
+    <div class="field" style="max-width:420px; margin-bottom:16px;">
+      <label for="nickname">Deal nickname / address</label>
+      <input type="text" id="nickname" placeholder="e.g. 412 Maple Ridge Ct">
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h2>Deal Inputs</h2>
+
+        <div class="section-label">Purchase &amp; Financing</div>
+        <div class="field">
+          <label for="price">Purchase price</label>
+          <div class="row"><span class="prefix">$</span><input type="number" id="price" value="350000" step="1000"></div>
+        </div>
+        <div class="field">
+          <label for="down">Down payment</label>
+          <div class="row"><input type="number" id="down" value="20" step="1"><span class="suffix">%</span></div>
+        </div>
+        <div class="field">
+          <label for="rate">Interest rate (annual)</label>
+          <div class="row"><input type="number" id="rate" value="6.75" step="0.05"><span class="suffix">%</span></div>
+        </div>
+        <div class="field">
+          <label for="term">Loan term</label>
+          <div class="row"><input type="number" id="term" value="30" step="1"><span class="suffix">years</span></div>
+        </div>
+        <div class="field">
+          <label for="closing">Closing costs</label>
+          <div class="row"><span class="prefix">$</span><input type="number" id="closing" value="7000" step="500"></div>
+        </div>
+        <div class="field">
+          <label for="rehab">Upfront rehab / capex reserve</label>
+          <div class="row"><span class="prefix">$</span><input type="number" id="rehab" value="5000" step="500"></div>
+        </div>
+
+        <div class="section-label">Income</div>
+        <div class="field">
+          <label for="rent">Gross monthly rent</label>
+          <div class="row"><span class="prefix">$</span><input type="number" id="rent" value="2900" step="25"></div>
+        </div>
+        <div class="field">
+          <span class="toggle-link" id="rent-helper-toggle">Not sure on rent? Estimate it →</span>
+          <div class="helper-box" id="rent-helper-box" style="display:none;">
+            <div class="section-label" style="margin-top:0;">1% Rule (quick screen)</div>
+            <div class="row">
+              <input type="number" id="one-percent-pct" value="1.0" step="0.1" style="max-width:80px;"><span class="suffix">% of price / mo</span>
+              <button class="btn secondary" id="use-one-percent" type="button">Use this</button>
+            </div>
+            <div class="section-label">Or average your own comps</div>
+            <div class="comps-row">
+              <input type="number" id="comp1" placeholder="$ comp 1">
+              <input type="number" id="comp2" placeholder="$ comp 2">
+              <input type="number" id="comp3" placeholder="$ comp 3">
+              <button class="btn secondary" id="use-comps" type="button">Use average</button>
+            </div>
+          </div>
+        </div>
+        <div class="field">
+          <label for="vacancy">Vacancy allowance</label>
+          <div class="row"><input type="number" id="vacancy" value="5" step="0.5"><span class="suffix">%</span></div>
+        </div>
+
+        <div class="section-label">Operating Expenses (annual unless noted)</div>
+        <div class="field">
+          <label for="tax">Property tax</label>
+          <div class="row"><span class="prefix">$</span><input type="number" id="tax" value="4200" step="100"></div>
+        </div>
+        <div class="field">
+          <label for="insurance">Insurance</label>
+          <div class="row"><span class="prefix">$</span><input type="number" id="insurance" value="1600" step="100"></div>
+        </div>
+        <div class="field">
+          <label for="hoa">HOA (monthly)</label>
+          <div class="row"><span class="prefix">$</span><input type="number" id="hoa" value="0" step="25"></div>
+        </div>
+        <div class="field">
+          <label for="maint">Maintenance (% of rent)</label>
+          <div class="row"><input type="number" id="maint" value="6" step="0.5"><span class="suffix">%</span></div>
+        </div>
+        <div class="field">
+          <label for="mgmt">Property management (% of rent)</label>
+          <div class="row"><input type="number" id="mgmt" value="8" step="0.5"><span class="suffix">%</span></div>
+        </div>
+        <div class="field">
+          <label for="other">Other monthly expenses</label>
+          <div class="row"><span class="prefix">$</span><input type="number" id="other" value="0" step="25"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Results</h2>
+        <span class="toggle-link" id="settings-toggle">⚙ Adjust screening thresholds</span>
+        <div class="helper-box" id="settings-box" style="display:none;">
+          <div class="settings-row">
+            <div class="field">
+              <label for="setting-cap-rate">Cap rate target</label>
+              <div class="row"><input type="number" id="setting-cap-rate" step="0.5"><span class="suffix">%</span></div>
+            </div>
+            <div class="field">
+              <label for="setting-coc">Cash-on-cash target</label>
+              <div class="row"><input type="number" id="setting-coc" step="0.5"><span class="suffix">%</span></div>
+            </div>
+            <div class="field">
+              <label for="setting-dscr">DSCR target</label>
+              <div class="row"><input type="number" id="setting-dscr" step="0.05"><span class="suffix">x</span></div>
+            </div>
+          </div>
+          <div class="btn-row">
+            <button class="btn secondary" id="save-settings" type="button">Apply</button>
+            <button class="btn secondary" id="reset-settings" type="button">Reset to Defaults</button>
+          </div>
+        </div>
+
+        <div class="metric-list" id="results"></div>
+        <div class="verdict" id="verdict"></div>
+
+        <div class="btn-row">
+          <button class="btn" id="save-deal" type="button">Save Deal</button>
+          <button class="btn secondary" id="share-link" type="button">Copy Share Link</button>
+          <button class="btn secondary" id="export-print" type="button">Export / Print</button>
+        </div>
+        <div class="share-box" id="share-box"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Deal Insights</h2>
+      <div class="insights-list" id="insights-list"></div>
+      <p class="insights-caption">Rule-based checks against common underwriting benchmarks — not AI/ML, just a set of if/then heuristics applied automatically so they're not missed.</p>
+    </div>
+
+    <div class="card">
+      <h2>Scenario Analysis</h2>
+      <p class="scenario-note">Stress-tests your base case against a downside (rent −10%, vacancy +5pp, maintenance +2pp, rate +1.0pp) and an upside (rent +5%, vacancy −2pp, rate −0.25pp), holding purchase price and financing structure constant.</p>
+      <table class="data-table" id="scenario-table"></table>
+      <div class="legend" id="scenario-legend"></div>
+    </div>
+
+    <div class="card">
+      <h2>Long-Term Projection</h2>
+      <p class="scenario-note">Projects equity buildup and cash flow over a hold period, with adjustable appreciation, rent growth, expense growth, and estimated selling costs at exit.</p>
+      <div class="proj-controls">
+        <div class="field">
+          <label for="proj-hold-years">Hold period</label>
+          <div class="row"><input type="number" id="proj-hold-years" value="10" step="1"><span class="suffix">yrs</span></div>
+        </div>
+        <div class="field">
+          <label for="proj-appreciation">Appreciation</label>
+          <div class="row"><input type="number" id="proj-appreciation" value="3" step="0.5"><span class="suffix">%/yr</span></div>
+        </div>
+        <div class="field">
+          <label for="proj-rent-growth">Rent growth</label>
+          <div class="row"><input type="number" id="proj-rent-growth" value="2" step="0.5"><span class="suffix">%/yr</span></div>
+        </div>
+        <div class="field">
+          <label for="proj-expense-growth">Expense growth</label>
+          <div class="row"><input type="number" id="proj-expense-growth" value="2" step="0.5"><span class="suffix">%/yr</span></div>
+        </div>
+        <div class="field">
+          <label for="proj-selling-cost">Selling costs at exit</label>
+          <div class="row"><input type="number" id="proj-selling-cost" value="7" step="0.5"><span class="suffix">%</span></div>
+        </div>
+      </div>
+      <div class="projection-summary" id="projection-summary"></div>
+      <div class="chart-wrap"><canvas id="projection-chart"></canvas></div>
+      <p class="insights-caption">IRR and equity multiple are estimates based on the assumptions above, not guarantees. Selling costs are applied only at the final year to estimate net sale proceeds.</p>
+    </div>
+  </div>
+
+  <!-- ===================== PROPERTY SEARCH ===================== -->
+  <div id="tab-search" class="tab-panel">
+    <div class="demo-banner">
+      📋 <strong>Sample listings for demo purposes.</strong> This app has no live MLS or data-provider connection —
+      that requires a licensed feed (e.g. RentCast, ATTOM, or broker MLS access) not available for a personal project.
+      The search, filtering, and "Analyze This Deal" flow are fully functional; swapping <code>js/listings.js</code>
+      for a real API response is the only change needed to go live. See ROADMAP.md.
+    </div>
+    <div class="search-controls">
+      <div class="field">
+        <label for="filter-max-price">Max price</label>
+        <input type="number" id="filter-max-price" placeholder="e.g. 400000" step="5000">
+      </div>
+      <div class="field">
+        <label for="filter-min-beds">Min beds</label>
+        <input type="number" id="filter-min-beds" placeholder="e.g. 3" step="1">
+      </div>
+      <div class="field">
+        <label for="filter-city">City</label>
+        <select id="filter-city"><option value="">All cities</option></select>
+      </div>
+    </div>
+    <div class="listing-grid" id="listing-grid"></div>
+  </div>
+
+  <!-- ===================== PORTFOLIO ===================== -->
+  <div id="tab-portfolio" class="tab-panel">
+    <div class="portfolio-summary">
+      <div class="summary-stat">
+        <div class="label">Saved Deals</div>
+        <div class="value" id="summary-count">0</div>
+      </div>
+      <div class="summary-stat">
+        <div class="label">Total Monthly Cash Flow</div>
+        <div class="value" id="summary-cashflow">$0</div>
+      </div>
+      <div class="summary-stat">
+        <div class="label">Blended Cap Rate</div>
+        <div class="value" id="summary-caprate">0%</div>
+      </div>
+      <div class="summary-stat">
+        <div class="label">Blended Cash-on-Cash</div>
+        <div class="value" id="summary-coc">0%</div>
+      </div>
+    </div>
+
+    <div class="empty-state" id="portfolio-empty">
+      No saved deals yet. Analyze a property in the Calculator tab and click "Save Deal" to start building your portfolio.
+    </div>
+
+    <div class="btn-row" id="portfolio-actions" style="display:none;">
+      <button class="btn secondary" id="export-csv" type="button">Export CSV</button>
+    </div>
+
+    <div class="card" id="portfolio-table-wrap" style="display:none; overflow-x:auto;">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th class="checkbox-cell">Compare</th>
+            <th style="text-align:left">Deal</th>
+            <th>Price</th>
+            <th>Monthly CF</th>
+            <th>Cap Rate</th>
+            <th>Cash-on-Cash</th>
+            <th>DSCR</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="portfolio-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===================== COMPARE ===================== -->
+  <div id="tab-compare" class="tab-panel">
+    <div class="card" id="compare-content">
+      <div class="empty-state">Select 2-3 saved deals from the Portfolio tab to compare them side by side.</div>
+    </div>
+  </div>
+
+  <footer>
+    All figures are estimates for evaluation purposes only, not financial or investment advice. Formulas: mortgage payment uses standard amortization; NOI = effective gross income − operating expenses (excludes debt service); cap rate = NOI ÷ purchase price; cash-on-cash = annual pre-tax cash flow ÷ total cash invested; DSCR = NOI ÷ annual debt service. Saved deals and portfolio data are stored locally in your browser (no account or server involved).
+  </footer>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="js/calc.js?v=3"></script>
+<script src="js/projections.js?v=3"></script>
+<script src="js/insights.js?v=3"></script>
+<script src="js/settings.js?v=3"></script>
+<script src="js/export.js?v=3"></script>
+<script src="js/listings.js?v=3"></script>
+<script src="js/storage.js?v=3"></script>
+<script src="js/share.js?v=3"></script>
+<script src="js/app.js?v=3"></script>
+</body>
+</html>
+                                                                                                                                                                                                                                                  
